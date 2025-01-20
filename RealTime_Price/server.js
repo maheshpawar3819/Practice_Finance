@@ -40,13 +40,13 @@ io.on("connection", (socket) => {
   const interval = setInterval(async () => {
     try {
       const [rows] = await db.query(
-        `SELECT * FROM index_data ORDER BY created_at DESC LIMIT 3`
+        `SELECT * FROM index_data ORDER BY created_at DESC LIMIT 2`
       );
       socket.emit("stockUpdates", rows); // Correct event name
     } catch (err) {
       console.error("Error fetching stock data:", err);
     }
-  }, 60000);
+  }, 10000);
 
   // Handle client disconnect
   socket.on("disconnect", () => {
