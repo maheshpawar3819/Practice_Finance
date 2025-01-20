@@ -4,10 +4,28 @@ const { Server } = require("socket.io");
 const http = require("http");
 const { fetchAndStoreData } = require("./controller/indexController");
 const db = require("./db_conig/db");
+const cors = require("cors");
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+// cors options
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"],
+    credentials: true,
+  })
+);
+const io = new Server(
+  server,
+  //cors for io
+  {
+    cors: {
+      origin: "http://localhost:5173",
+      methods: ["GET", "POST"],
+    },
+  }
+);
 
 //route
 app.get("/", (req, res) => {
@@ -16,23 +34,24 @@ app.get("/", (req, res) => {
 
 //set up a socket.iO connection handler
 io.on("connection", (socket) => {
-  console.log("client is connected");
+  console.log("A client is connected");
 
-  //set up a timer function to fetch and emit stock updates every 60 seconds
-  const intervel = setInterval(async () => {
-    const [rows] = await db.query(
-      `SELECT * FROM index_data ORDER BY created_at DESC LIMIT 3`
-    );
-
-    //give letest stock data to connected client
-    socket.emit("sotckUpdates", rows);
+  // Timer to fetch and emit stock updates every 60 seconds
+  const interval = setInterval(async () => {
+    try {
+      const [rows] = await db.query(
+        `SELECT * FROM index_data ORDER BY created_at DESC LIMIT 3`
+      );
+      socket.emit("stockUpdates", rows); // Correct event name
+    } catch (err) {
+      console.error("Error fetching stock data:", err);
+    }
   }, 60000);
 
-  //when client disconnect
+  // Handle client disconnect
   socket.on("disconnect", () => {
-    console.log(`A client is disconnectd`);
-    //clearing time interval when client is disconnect
-    clearInterval(intervel);
+    console.log("A client is disconnected");
+    clearInterval(interval); // Clear interval on disconnect
   });
 });
 
