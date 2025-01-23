@@ -1,4 +1,4 @@
-const GoogleStrategy = require("passport-google-oauth").Strategy;
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const passport = require("passport");
 
 passport.use(

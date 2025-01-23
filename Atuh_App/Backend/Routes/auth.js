@@ -1,44 +1,54 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
+const db = require("../server");
 
-// api for when login can success
+
+// Login success route
 router.get("/login/success", (req, res) => {
   if (req.user) {
     res.status(200).json({
       error: false,
-      message: "Successfully Loged In",
+      message: "Successfully Logged In",
+      user: req.user,
     });
   } else {
-    res.status(403).json({
+    res.status(401).json({
       error: true,
       message: "Not Authorized",
     });
   }
 });
 
-// api for when login fail
-router.get("/login/faild", (req, res) => {
-  res.status(401).json({
-    error: true,
-    message: "Login Failuar",
+// Create a new user in the database
+router.post("/create-user", (req, res) => {
+  const { googleId, linkedinId, email, name } = req.body;
+
+  const query = `
+    INSERT INTO users (googleId, linkedinId, email, name)
+    VALUES (?, ?, ?, ?)
+    ON DUPLICATE KEY UPDATE email = VALUES(email), name = VALUES(name)
+  `;
+
+  db.query(query, [googleId, linkedinId, email, name], (err, results) => {
+    if (err) {
+      console.error("Error inserting user:", err);
+      return res.status(500).json({ error: true, message: "Database error" });
+    }
+    res.status(200).json({ error: false, message: "User saved successfully" });
   });
 });
 
-router.get(
-  "/google/callback",
-  passport.authenticate("google", {
-    successRedirect: process.env.CLIENT_URL,
-    failureRedirect: "/login/faild",
-  })
-);
-
-router.get("/google", passport.authenticate("google", ["profile", "email"]));
-
-router.get("/logout", (req, res) => {
-  req.logout();
-  res.redirect(process.env.CLIENT_URL);
+// Fetch all users
+router.get("/users", (req, res) => {
+  db.query("SELECT * FROM users", (err, results) => {
+    if (err) {
+      console.error("Error fetching users:", err);
+      return res.status(500).json({ error: true, message: "Database error" });
+    }
+    res.status(200).json({ error: false, users: results });
+  });
 });
 
 
-module.exports=router;
+module.exports = router;
