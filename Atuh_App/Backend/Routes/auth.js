@@ -3,13 +3,13 @@ const router = express.Router();
 const passport = require("passport");
 const db = require("../server");
 
-
-// Login success route
-router.get("/login/success", (req, res) => {
+// success routes
+// Google login success route
+router.get("/login/google/success", (req, res) => {
   if (req.user) {
     res.status(200).json({
       error: false,
-      message: "Successfully Logged In",
+      message: "Successfully Logged In via Google",
       user: req.user,
     });
   } else {
@@ -20,7 +20,40 @@ router.get("/login/success", (req, res) => {
   }
 });
 
-// Create a new user in the database
+// LinkedIn login success route
+router.get("/login/linkedin/success", (req, res) => {
+  if (req.user) {
+    res.status(200).json({
+      error: false,
+      message: "Successfully Logged In via LinkedIn",
+      user: req.user,
+    });
+  } else {
+    res.status(401).json({
+      error: true,
+      message: "Not Authorized",
+    });
+  }
+});
+
+// Failure routes
+// Google login failure route
+router.get("/login/google/failure", (req, res) => {
+  res.status(401).json({
+    error: true,
+    message: "Google Authentication Failed",
+  });
+});
+
+// LinkedIn login failure route
+router.get("/login/linkedin/failure", (req, res) => {
+  res.status(401).json({
+    error: true,
+    message: "LinkedIn Authentication Failed",
+  });
+});
+
+// Create or update user (Google/LinkedIn)
 router.post("/create-user", (req, res) => {
   const { googleId, linkedinId, email, name } = req.body;
 
@@ -39,7 +72,7 @@ router.post("/create-user", (req, res) => {
   });
 });
 
-// Fetch all users
+// to Fetch all users
 router.get("/users", (req, res) => {
   db.query("SELECT * FROM users", (err, results) => {
     if (err) {
@@ -49,6 +82,5 @@ router.get("/users", (req, res) => {
     res.status(200).json({ error: false, users: results });
   });
 });
-
 
 module.exports = router;
