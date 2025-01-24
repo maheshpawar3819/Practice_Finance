@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import UserList from "./Components/UserList";
-import CreateUser from "./Components/CreateUser";
+
 
 function App() {
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:8080/auth/google";
+    window.location.href = "http://localhost:8080/auth/login/google/success";
   };
 
   const handleLinkedInLogin = () => {

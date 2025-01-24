@@ -7,6 +7,7 @@ const db = require("../Db/db");
 // Google login success route
 router.get("/login/google/success", (req, res) => {
   if (req.user) {
+    console.log(req.body);
     res.status(200).json({
       error: false,
       message: "Successfully Logged In via Google",
@@ -39,6 +40,7 @@ router.get("/login/linkedin/success", (req, res) => {
 // Failure routes
 // Google login failure route
 router.get("/login/google/failure", (req, res) => {
+  console.log(req.body);
   res.status(401).json({
     error: true,
     message: "Google Authentication Failed",
