@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const db = require("../server");
+const db = require("../Db/db");
 
 // success routes
 // Google login success route
@@ -76,7 +76,8 @@ router.post("/create-user", (req, res) => {
 router.get("/users", (req, res) => {
   db.query("SELECT * FROM users", (err, results) => {
     if (err) {
-      console.error("Error fetching users:", err);
+      console.error("Error fetching users:");
+      console.log(err)
       return res.status(500).json({ error: true, message: "Database error" });
     }
     res.status(200).json({ error: false, users: results });

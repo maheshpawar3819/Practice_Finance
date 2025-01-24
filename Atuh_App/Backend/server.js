@@ -6,7 +6,6 @@ const cookieSession = require("cookie-session");
 require("./passport"); 
 const authRoutes = require("./Routes/auth");
 const app = express();
-const db=require("./Db/db");
 
 app.use(
   cookieSession({
