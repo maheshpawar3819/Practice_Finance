@@ -56,7 +56,7 @@ router.get("/login/linkedin/failure", (req, res) => {
 // Create or update user (Google/LinkedIn)
 router.post("/create-user", (req, res) => {
   const { googleId, linkedinId, email, name } = req.body;
-
+  console.log(googleId,linkedinId)
   const query = `
     INSERT INTO users (googleId, linkedinId, email, name)
     VALUES (?, ?, ?, ?)
