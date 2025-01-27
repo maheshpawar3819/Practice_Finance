@@ -2,15 +2,34 @@ const db = require("../DB/db");
 const express = require("express");
 const router = express.Router();
 
-//get route for fetching all companies
+//get route for fetching all companies with imbeded pagination
 router.route("/companies").get(async (req, res) => {
   try {
-    const [result] = await db.query("SELECT * FROM companies");
+    const { page = 1, pageSize = 10 } = req.params;
+
+    const offset = (page - 1) * pageSize;
+
+    //fetch companies with pagination
+    const [result] = await db.query(
+      "SELECT * FROM companies LIMIT ? OFFSET ?",
+      [parseInt(pageSize), offset]
+    );
+
+    //getting total number of companies for pagination data
+    const [[totalResult]] = await db.query(
+      `SELECT COUNT(*) AS totalRecords FROM companies`
+    );
 
     res.status(200).json({
       success: true,
-      message: "Successfully fetched all stock companies",
+      message: "Successfully fetched stock companies",
       result,
+      pagination: {
+        currentPage: parseInt(page),
+        pageSize: parseInt(pageSize),
+        totalRecords: totalResult.totalRecords,
+        totalPages: Math.ceil(totalResult.totalRecords / pageSize),
+      },
     });
   } catch (error) {
     res.status(500).json({
@@ -89,7 +108,7 @@ router
       return res.status(200).json({
         success: true,
         message: `Successfully fetched companies with market cap ${comparison} ${value}`,
-        result
+        result,
       });
     } catch (error) {
       return res.status(500).json({
