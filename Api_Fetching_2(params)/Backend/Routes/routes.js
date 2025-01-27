@@ -5,7 +5,7 @@ const router = express.Router();
 //get route for fetching all companies with imbeded pagination
 router.route("/companies").get(async (req, res) => {
   try {
-    const { page = 1, pageSize = 10 } = req.params;
+    const { page = 1, pageSize = 10 } = req.query;
 
     const offset = (page - 1) * pageSize;
 

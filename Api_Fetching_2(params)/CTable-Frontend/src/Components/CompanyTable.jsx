@@ -10,12 +10,12 @@ const CompanyTable = () => {
   const [pageSize] = useState(10);
   const [filter, setFilter] = useState({ sector: "", marketCap: null });
 
-  //fetch companies based on current page
+  // Fetch companies based on the current page
   const fetchCompanies = async () => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/companies?page=${page}&pageSize=${pageSize}`
+        `http://localhost:8080/api/companies?page=${currentPage}&pageSize=${pageSize}`
       );
       setData(response?.data?.result);
       setTotalPages(response?.data?.pagination?.totalPages);
@@ -26,15 +26,16 @@ const CompanyTable = () => {
     }
   };
 
-  //filtering by sector
+  // Filter by sector
   const fetchBySector = async () => {
+    if (!filter.sector) return;
     setLoading(true);
     try {
       const response = await axios.get(
         `http://localhost:8080/api/companies/sector/${filter.sector}`
       );
-      setFilter(response?.data?.result);
-      setTotalPages(1);
+      setData(response?.data?.result);
+      setTotalPages(1); // Adjust pagination for filtered data
     } catch (error) {
       console.error("Error fetching by sector:", error);
     } finally {
@@ -42,16 +43,16 @@ const CompanyTable = () => {
     }
   };
 
-  //handle filtering by market cap
-  const filteringByMarketCap = async () => {
+  // Filter by market cap
+  const fetchByMarketCap = async (comparison, value) => {
+    if (!value) return;
     setLoading(true);
     try {
       const response = await axios.get(
         `http://localhost:8080/api/companies/market-cap/${comparison}/${value}`
       );
-
       setData(response?.data?.result);
-      setTotalPages(1);
+      setTotalPages(1); // Adjust pagination for filtered data
     } catch (error) {
       console.error("Error fetching by market cap:", error);
     } finally {
@@ -59,14 +60,14 @@ const CompanyTable = () => {
     }
   };
 
-  //   filtering the data on page change
+  // Fetch data on page change
   useEffect(() => {
     if (!filter.sector && !filter.marketCap) {
-      fetchCompanies(currentPage);
+      fetchCompanies();
     }
   }, [currentPage, filter]);
 
-  //define table colums
+  // Define table columns
   const columns = React.useMemo(
     () => [
       { Header: "Id", accessor: "company_id" },
@@ -79,7 +80,7 @@ const CompanyTable = () => {
     []
   );
 
-  //react table instance
+  // React-Table instance
   const tableInstance = useTable(
     {
       columns,
@@ -96,6 +97,7 @@ const CompanyTable = () => {
   return (
     <div>
       <div className="p-6">
+        {/* Sector Filter */}
         <div className="flex justify-between mb-4">
           <input
             type="text"
@@ -111,6 +113,8 @@ const CompanyTable = () => {
             Filter
           </button>
         </div>
+
+        {/* Market Cap Filter */}
         <div className="flex mb-4">
           <input
             type="text"
@@ -127,6 +131,8 @@ const CompanyTable = () => {
             Market Cap GT
           </button>
         </div>
+
+        {/* Table */}
         <table
           {...getTableProps()}
           className="min-w-full bg-white border rounded-md"
@@ -171,6 +177,8 @@ const CompanyTable = () => {
             )}
           </tbody>
         </table>
+
+        {/* Pagination Controls */}
         <div className="flex justify-between mt-4">
           <button
             className="bg-gray-500 text-white px-4 py-2 rounded-md"
