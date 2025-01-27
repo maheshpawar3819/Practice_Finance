@@ -1,9 +1,8 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const db=require("./DB/db");
-const routers=require("./Routes/routes");
-
+const db = require("./DB/db");
+const routers = require("./Routes/routes");
 
 const app = express();
 app.use(
@@ -15,14 +14,16 @@ app.use(
 );
 
 //routes
-app.use("/api",routers);
+app.use("/api", routers);
 
 //db connection
-db.connect((err) => {
-    if (err) {
-      console.log(`cannot connect to database`);
-    }
-    console.log(`Connect to Database...`);
+db.getConnection()
+  .then((connection) => {
+    console.log(`Connected to Database...`);
+    connection.release();
+  })
+  .catch((err) => {
+    console.log(`Cannot connect to database`, err);
   });
 
 const PORT = process.env.PORT || 5000;
