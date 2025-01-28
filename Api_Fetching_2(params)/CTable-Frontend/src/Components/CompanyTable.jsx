@@ -14,6 +14,7 @@ const CompanyTable = () => {
     marketCapComparison: "gt",
   });
 
+  //fetch all companies
   const fetchCompanies = async () => {
     setLoading(true);
     try {
@@ -29,6 +30,7 @@ const CompanyTable = () => {
     }
   };
 
+  //for filter
   const applyFilters = async () => {
     setLoading(true);
     try {
@@ -51,6 +53,7 @@ const CompanyTable = () => {
     }
   };
 
+  //reset filters
   const resetFilters = () => {
     setFilter({ sector: "", marketCap: "", marketCapComparison: "gt" });
     setCurrentPage(1);
