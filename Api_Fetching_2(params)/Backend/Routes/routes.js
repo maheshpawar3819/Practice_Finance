@@ -129,6 +129,7 @@ router
     }
   });
 
+//route for filter price
 router.route("/companies/price/:comparison/:value").get(async (req, res) => {
   try {
     const { comparison, value } = req.params;

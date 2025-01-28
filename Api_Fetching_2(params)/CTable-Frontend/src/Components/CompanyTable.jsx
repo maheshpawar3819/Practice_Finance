@@ -12,6 +12,8 @@ const CompanyTable = () => {
     sector: "",
     marketCap: "",
     marketCapComparison: "gt",
+    price: "",
+    priceComparison: "gt",
   });
   const [specificPage, setSpecificPage] = useState("");
 
@@ -37,14 +39,17 @@ const CompanyTable = () => {
     setLoading(true);
     //handling conditionally filters
     try {
-      const { sector, marketCap, marketCapComparison } = filter;
+      const { sector, marketCap, marketCapComparison, price, priceComparison } =
+        filter;
       let url = `http://localhost:8080/api/companies?page=${currentPage}&pageSize=${pageSize}`;
 
       if (sector) {
         url = `http://localhost:8080/api/companies/sector/${sector}`;
       } else if (marketCap) {
         url = `http://localhost:8080/api/companies/market-cap/${marketCapComparison}/${marketCap}`;
-      } 
+      } else if (price) {
+        url = `http://localhost:8080/api/companies/price/${priceComparison}/${price}`;
+      }
 
       const response = await axios.get(url);
       setData(response?.data?.result);
@@ -70,7 +75,13 @@ const CompanyTable = () => {
 
   //reset filters
   const resetFilters = () => {
-    setFilter({ sector: "", marketCap: "", marketCapComparison: "gt" });
+    setFilter({
+      sector: "",
+      marketCap: "",
+      marketCapComparison: "gt",
+      price: "",
+      priceComparison: "",
+    });
     setCurrentPage(1);
     fetchCompanies();
   };
@@ -139,6 +150,24 @@ const CompanyTable = () => {
           className="p-2 border rounded-md shadow-sm focus:outline-none focus:ring focus:ring-green-300"
           onChange={(e) =>
             setFilter({ ...filter, marketCapComparison: e.target.value })
+          }
+        >
+          <option value="gt">Greater Than</option>
+          <option value="lt">Less Than</option>
+          <option value="eq">Equal To</option>
+        </select>
+        <input
+          type="number"
+          placeholder="Stock Price"
+          className="p-2 border rounded-md shadow-sm focus:outline-none focus:ring focus:ring-green-300"
+          value={filter.price}
+          onChange={(e) => setFilter({ ...filter, price: e.target.value })}
+        />
+        <select
+          value={filter.priceComparison}
+          className="p-2 border rounded-md shadow-sm focus:outline-none focus:ring focus:ring-green-300"
+          onChange={(e) =>
+            setFilter({ ...filter, priceComparison: e.target.value })
           }
         >
           <option value="gt">Greater Than</option>
