@@ -11,13 +11,13 @@ router.route("/companies").get(async (req, res) => {
 
     //fetch companies with pagination
     const [result] = await db.query(
-      "SELECT * FROM companies LIMIT ? OFFSET ?",
+      "SELECT * FROM comapanies_stocks_list LIMIT ? OFFSET ?",
       [parseInt(pageSize), offset]
     );
 
     //getting total number of companies for pagination data
     const [[totalResult]] = await db.query(
-      `SELECT COUNT(*) AS totalRecords FROM companies`
+      `SELECT COUNT(*) AS totalRecords FROM comapanies_stocks_list`
     );
 
     res.status(200).json({
@@ -53,7 +53,7 @@ router.route("/companies/sector/:sector").get(async (req, res) => {
     }
 
     const [result] = await db.query(
-      `SELECT * FROM companies WHERE sector = ?`,
+      `SELECT * FROM comapanies_stocks_list WHERE sector = ?`,
       [sector]
     );
 
@@ -87,13 +87,13 @@ router
       let query;
       switch (comparison) {
         case "gt":
-          query = `SELECT * FROM companies WHERE market_cap > ?`;
+          query = `SELECT * FROM comapanies_stocks_list WHERE market_cap > ?`;
           break;
         case "lt":
-          query = `SELECT * FROM companies WHERE market_cap < ?`;
+          query = `SELECT * FROM comapanies_stocks_list WHERE market_cap < ?`;
           break;
         case "eq":
-          query = `SELECT * FROM companies WHERE market_cap = ? `;
+          query = `SELECT * FROM comapanies_stocks_list WHERE market_cap = ? `;
           break;
         default:
           return res.status(400).json({
