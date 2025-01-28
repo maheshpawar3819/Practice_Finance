@@ -8,7 +8,11 @@ const CompanyTable = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
-  const [filter, setFilter] = useState({ sector: "", marketCap: null });
+  const [filter, setFilter] = useState({
+    sector: "",
+    marketCap: "",
+    marketCapComparison: "gt",
+  });
 
   const fetchCompanies = async () => {
     setLoading(true);
@@ -25,43 +29,37 @@ const CompanyTable = () => {
     }
   };
 
-  const fetchBySector = async () => {
-    if (!filter.sector) return;
+  const applyFilters = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(
-        `http://localhost:8080/api/companies/sector/${filter.sector}`
-      );
+      const { sector, marketCap, marketCapComparison } = filter;
+      let url = `http://localhost:8080/api/companies?page=${currentPage}&pageSize=${pageSize}`;
+
+      if (sector) {
+        url = `http://localhost:8080/api/companies/sector/${sector}`;
+      } else if (marketCap) {
+        url = `http://localhost:8080/api/companies/market-cap/${marketCapComparison}/${marketCap}`;
+      }
+
+      const response = await axios.get(url);
       setData(response?.data?.result);
-      setTotalPages(1);
+      setTotalPages(response?.data?.pagination?.totalPages || 1);
     } catch (error) {
-      console.error("Error fetching by sector:", error);
+      console.error("Error applying filters:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchByMarketCap = async (comparison, value) => {
-    if (!value) return;
-    setLoading(true);
-    try {
-      const response = await axios.get(
-        `http://localhost:8080/api/companies/market-cap/${comparison}/${value}`
-      );
-      setData(response?.data?.result);
-      setTotalPages(1);
-    } catch (error) {
-      console.error("Error fetching by market cap:", error);
-    } finally {
-      setLoading(false);
-    }
+  const resetFilters = () => {
+    setFilter({ sector: "", marketCap: "", marketCapComparison: "gt" });
+    setCurrentPage(1);
+    fetchCompanies();
   };
 
   useEffect(() => {
-    if (!filter.sector && !filter.marketCap) {
-      fetchCompanies();
-    }
-  }, [currentPage, filter]);
+    fetchCompanies();
+  }, [currentPage]);
 
   const columns = React.useMemo(
     () => [
@@ -100,7 +98,9 @@ const CompanyTable = () => {
 
   return (
     <div className="p-6">
+      {/* Filters Section */}
       <div className="flex flex-wrap gap-4 mb-6">
+        {/* Filter by Sector */}
         <input
           type="text"
           placeholder="Filter by sector"
@@ -108,27 +108,40 @@ const CompanyTable = () => {
           value={filter.sector}
           onChange={(e) => setFilter({ ...filter, sector: e.target.value })}
         />
-        <button
-          className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md shadow-md"
-          onClick={fetchBySector}
-        >
-          Filter by Sector
-        </button>
+        {/* Filter by Market Cap */}
         <input
-          type="text"
+          type="number"
           placeholder="Market cap value"
           className="p-2 border rounded-md shadow-sm focus:outline-none focus:ring focus:ring-green-300"
+          value={filter.marketCap}
           onChange={(e) => setFilter({ ...filter, marketCap: e.target.value })}
         />
-        <button
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md"
-          onClick={() => fetchByMarketCap("gt", filter.marketCap)}
+        <select
+          value={filter.marketCapComparison}
+          className="p-2 border rounded-md shadow-sm focus:outline-none focus:ring focus:ring-green-300"
+          onChange={(e) =>
+            setFilter({ ...filter, marketCapComparison: e.target.value })
+          }
         >
-          Market Cap GT
+          <option value="gt">Greater Than</option>
+          <option value="lt">Less Than</option>
+          <option value="eq">Equal To</option>
+        </select>
+        <button
+          className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md shadow-md cursor-pointer"
+          onClick={applyFilters}
+        >
+          Apply Filters
+        </button>
+        <button
+          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md shadow-md cursor-pointer"
+          onClick={resetFilters}
+        >
+          Reset Filters
         </button>
       </div>
 
-      {/* //table  */}
+      {/* Table */}
       <div className="overflow-x-auto">
         <table
           {...getTableProps()}
@@ -182,7 +195,7 @@ const CompanyTable = () => {
         </table>
       </div>
 
-      {/* pagination  */}
+      {/* Pagination */}
       <div className="flex justify-between items-center mt-6 max-w-[1200px] mx-auto">
         <button
           className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md shadow-md"
