@@ -39,7 +39,7 @@ router.route("/companies").get(async (req, res) => {
         currentPage: parseInt(page),
         pageSize: parseInt(pageSize),
         totalRecords,
-        totalPages
+        totalPages,
       },
     });
   } catch (error) {
@@ -91,20 +91,20 @@ router
       if ((!comparison, !value)) {
         return res.status(400).json({
           error: true,
-          message: "Sector parameter is required",
+          message: "parameter is required",
         });
       }
 
       let query;
       switch (comparison) {
         case "gt":
-          query = `SELECT * FROM comapanies_stocks_list WHERE market_cap > ?`;
+          query = `SELECT * FROM comapanies_stocks_list WHERE Market_cap_in_Lakh > ?`;
           break;
         case "lt":
-          query = `SELECT * FROM comapanies_stocks_list WHERE market_cap < ?`;
+          query = `SELECT * FROM comapanies_stocks_list WHERE Market_cap_in_Lakh < ?`;
           break;
         case "eq":
-          query = `SELECT * FROM comapanies_stocks_list WHERE market_cap = ? `;
+          query = `SELECT * FROM comapanies_stocks_list WHERE Market_cap_in_Lakh = ? `;
           break;
         default:
           return res.status(400).json({
@@ -128,5 +128,51 @@ router
       });
     }
   });
+
+router.route("/companies/price/:comparison/:value").get(async (req, res) => {
+  try {
+    const { comparison, value } = req.params;
+
+    //error handling
+    if ((!comparison, !value)) {
+      return res.status(400).json({
+        error: true,
+        message: "parameters are required",
+      });
+    }
+
+    let query;
+    switch (comparison) {
+      case "gt":
+        query = `SELECT * FROM comapanies_stocks_list WHERE Price > ?`;
+        break;
+      case "lt":
+        query = `SELECT * FROM comapanies_stocks_list WHERE Price < ?`;
+        break;
+      case "eq":
+        query = `SELECT * FROM comapanies_stocks_list WHERE Price = ?`;
+        break;
+      default:
+        return res.status(400).json({
+          error: true,
+          message:
+            "Invalid comparison parameter. Use 'gt' for greater than, 'lt' for less than, or 'eq' for equal to.",
+        });
+    }
+
+    const [result] = await db.query(query, [value]);
+
+    return res.status(200).json({
+      success: true,
+      message: `Successfully fetched companies with market cap ${comparison} ${value}`,
+      result,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: true,
+      message: "Server side error",
+    });
+  }
+});
 
 module.exports = router;

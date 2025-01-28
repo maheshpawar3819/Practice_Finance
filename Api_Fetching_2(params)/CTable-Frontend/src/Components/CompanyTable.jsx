@@ -22,7 +22,7 @@ const CompanyTable = () => {
       const response = await axios.get(
         `http://localhost:8080/api/companies?page=${currentPage}&pageSize=${pageSize}`
       );
-      // console.log(response?.data?.pagination?.totalPages)
+      console.log(response?.data);
       setData(response?.data?.result);
       setTotalPages(response?.data?.pagination?.totalPages);
     } catch (error) {
@@ -35,6 +35,7 @@ const CompanyTable = () => {
   //for filter
   const applyFilters = async () => {
     setLoading(true);
+    //handling conditionally filters
     try {
       const { sector, marketCap, marketCapComparison } = filter;
       let url = `http://localhost:8080/api/companies?page=${currentPage}&pageSize=${pageSize}`;
@@ -43,7 +44,7 @@ const CompanyTable = () => {
         url = `http://localhost:8080/api/companies/sector/${sector}`;
       } else if (marketCap) {
         url = `http://localhost:8080/api/companies/market-cap/${marketCapComparison}/${marketCap}`;
-      }
+      } 
 
       const response = await axios.get(url);
       setData(response?.data?.result);
@@ -215,7 +216,7 @@ const CompanyTable = () => {
       {/* Pagination */}
       <div className="flex justify-between items-center mt-6 max-w-[1200px] mx-auto">
         <button
-          className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md shadow-md"
+          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md shadow-md cursor-pointer"
           disabled={currentPage === 1}
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
         >
@@ -233,14 +234,14 @@ const CompanyTable = () => {
             onChange={(e) => setSpecificPage(e.target.value)}
           />
           <button
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md"
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md cursor-pointer"
             onClick={goto}
           >
             Go
           </button>
         </div>
         <button
-          className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md shadow-md"
+          className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md shadow-md cursor-pointer"
           disabled={currentPage === totalPages}
           onClick={() => setCurrentPage((prev) => prev + 1)}
         >
