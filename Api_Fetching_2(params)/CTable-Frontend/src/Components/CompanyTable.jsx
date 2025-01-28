@@ -128,7 +128,7 @@ const CompanyTable = () => {
   return (
     <div className="p-6">
       {/* Filters Section */}
-      <div className="flex flex-wrap gap-4 mb-6">
+      <div className="flex flex-wrap justify-center gap-4 mb-6">
         {/* Filter by Sector */}
         <input
           type="text"
