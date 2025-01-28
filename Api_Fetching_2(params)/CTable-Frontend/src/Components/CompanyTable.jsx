@@ -13,6 +13,7 @@ const CompanyTable = () => {
     marketCap: "",
     marketCapComparison: "gt",
   });
+  const [specificPage, setSpecificPage] = useState("");
 
   //fetch all companies
   const fetchCompanies = async () => {
@@ -21,6 +22,7 @@ const CompanyTable = () => {
       const response = await axios.get(
         `http://localhost:8080/api/companies?page=${currentPage}&pageSize=${pageSize}`
       );
+      // console.log(response?.data?.pagination?.totalPages)
       setData(response?.data?.result);
       setTotalPages(response?.data?.pagination?.totalPages);
     } catch (error) {
@@ -50,6 +52,18 @@ const CompanyTable = () => {
       console.error("Error applying filters:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  //for handle navigation to specific
+  const goto = () => {
+    //error handle
+    if (specificPage < 1 || specificPage > totalPages) {
+      alert(`Please enter a valid page number between 1 and ${totalPages}.`);
+    } else {
+      setCurrentPage(Number(specificPage));
+      //api call for specific page
+      fetchCompanies();
     }
   };
 
@@ -207,9 +221,24 @@ const CompanyTable = () => {
         >
           Previous
         </button>
-        <span className="text-gray-700">
-          Page {currentPage} of {totalPages}
-        </span>
+        <div className="flex items-center gap-4">
+          <span className="text-gray-700">
+            Page {currentPage} of {totalPages}
+          </span>
+          <input
+            type="number"
+            className="p-2 border rounded-md w-16 text-center shadow-sm focus:outline-none focus:ring focus:ring-green-300"
+            placeholder="Page"
+            value={specificPage}
+            onChange={(e) => setSpecificPage(e.target.value)}
+          />
+          <button
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md"
+            onClick={goto}
+          >
+            Go
+          </button>
+        </div>
         <button
           className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md shadow-md"
           disabled={currentPage === totalPages}

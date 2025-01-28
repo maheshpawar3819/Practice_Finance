@@ -20,6 +20,17 @@ router.route("/companies").get(async (req, res) => {
       `SELECT COUNT(*) AS totalRecords FROM comapanies_stocks_list`
     );
 
+    const totalRecords = totalResult.totalRecords;
+    const totalPages = Math.ceil(totalRecords / pageSize);
+
+    //checking requested page is valid
+    if (page > totalPages || page < 1) {
+      return res.status(400).json({
+        error: true,
+        message: `Invalid page number. Please provide a page number between 1 and ${totalPages}.`,
+      });
+    }
+
     res.status(200).json({
       success: true,
       message: "Successfully fetched stock companies",
@@ -27,8 +38,8 @@ router.route("/companies").get(async (req, res) => {
       pagination: {
         currentPage: parseInt(page),
         pageSize: parseInt(pageSize),
-        totalRecords: totalResult.totalRecords,
-        totalPages: Math.ceil(totalResult.totalRecords / pageSize),
+        totalRecords,
+        totalPages
       },
     });
   } catch (error) {
