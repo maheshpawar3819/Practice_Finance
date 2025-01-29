@@ -6,7 +6,6 @@ const { Server } = require("socket.io");
 const mysql = require("mysql2");
 const yahooFinance = require("yahoo-finance2").default;
 
-//express app
 const app = express();
 const server = http.createServer(app);
 
@@ -18,65 +17,86 @@ app.use(
   })
 );
 
-//setup io connection
-const io = new Server(
-  server,
-  //cors for io socket
-  {
-    cors: {
-      origin: "http://localhost:5173",
-      methods: ["GET", "POST"],
-      credentials: true,
-    },
-  }
-);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
 
-//Detabse connetion
 const db = mysql
-  .createConnection({
+  .createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE_NAME,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
   })
   .promise();
 
-db.connect((err) => {
-  if (err) {
-    console.error(`my Sql connection error`, err);
-    process.exit(1);
-  }
-
-  console.log(`connected to server`);
-});
-
-//function to fetch api and save the data into mysql table
 const fetchAndSaveNifty50 = async () => {
   try {
-    // Stocks Symball for fetching
     const niftyStocks = [
       "RELIANCE.NS",
       "TCS.NS",
       "INFY.NS",
-      "HDFC.NS",
       "ICICIBANK.NS",
+      "HDFCBANK.NS",
+      "BHARTIARTL.NS",
+      "KOTAKBANK.NS",
+      "ITC.NS",
+      "LT.NS",
+      "SBIN.NS",
+      "AXISBANK.NS",
+      "HCLTECH.NS",
+      "WIPRO.NS",
+      "ASIANPAINT.NS",
+      "SUNPHARMA.NS",
+      "TITAN.NS",
+      "ULTRACEMCO.NS",
+      "BAJFINANCE.NS",
+      "BAJAJFINSV.NS",
+      "POWERGRID.NS",
+      "GRASIM.NS",
+      "TATASTEEL.NS",
+      "ONGC.NS",
+      "NTPC.NS",
+      "JSWSTEEL.NS",
+      "COALINDIA.NS",
+      "HINDALCO.NS",
+      "BPCL.NS",
+      "HEROMOTOCO.NS",
+      "M&M.NS",
+      "MARUTI.NS",
+      "EICHERMOT.NS",
+      "INDUSINDBK.NS",
+      "ADANIPORTS.NS",
+      "TECHM.NS",
+      "CIPLA.NS",
+      "DIVISLAB.NS",
+      "BRITANNIA.NS",
+      "DRREDDY.NS",
+      "NESTLEIND.NS",
+      "HINDUNILVR.NS",
+      "SBILIFE.NS",
+      "ICICIGI.NS",
+      "BAJAJ-AUTO.NS",
+      "APOLLOHOSP.NS",
+      "TATAMOTORS.NS",
+      "UPL.NS",
+      "DABUR.NS",
+      "PIDILITIND.NS",
     ];
 
-    //loop for save symball into the table
     for (let symbol of niftyStocks) {
+      const response = await yahooFinance.quoteSummary(symbol, {
+        modules: ["price", "summaryDetail", "defaultKeyStatistics"],
+      });
 
-      const response = await yahooFinance.quote(symbol);
-
-      console.log(response);
-
-      if (
-        !response ||
-        !response.regularMarketPrice ||
-        !response.regularMarketOpen ||
-        !response.regularMarketDayHigh ||
-        !response.regularMarketDayLow ||
-        !response.regularMarketChangePercent
-      ) {
+      if (!response || !response.price || !response.summaryDetail) {
         console.error(`Missing data for symbol: ${symbol}`);
         continue;
       }
@@ -86,74 +106,69 @@ const fetchAndSaveNifty50 = async () => {
         regularMarketOpen,
         regularMarketDayHigh,
         regularMarketDayLow,
-        regularMarketChangePercent,
-      } = response;
+      } = response.price || {};
 
+      const { marketCap, fiftyTwoWeekHigh, fiftyTwoWeekLow, trailingPE } =
+        response.summaryDetail || {};
 
+      const query = `INSERT INTO nifty50_stocks (
+        symbol, open_price, high_price, low_price, last_price, change_percent, 
+        market_cap, volume, fifty_two_week_high, fifty_two_week_low, pe_ratio
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON DUPLICATE KEY UPDATE 
+        open_price = VALUES(open_price),
+        high_price = VALUES(high_price),
+        low_price = VALUES(low_price),
+        last_price = VALUES(last_price),
+        change_percent = VALUES(change_percent),
+        market_cap = VALUES(market_cap),
+        volume = VALUES(volume),
+        fifty_two_week_high = VALUES(fifty_two_week_high),
+        fifty_two_week_low = VALUES(fifty_two_week_low),
+        pe_ratio = VALUES(pe_ratio)`;
 
-      //   save and update the data in to the table
-      const query = `INSERT INTO nifty50_stocks (symbol, open_price, high_price, low_price, last_price, change_percent)
-      VALUES (?, ?, ?, ?, ?, ?)
-      ON DUPLICATE KEY UPDATE
-      open_price = VALUES(open_price),
-      high_price = VALUES(high_price),
-      low_price = VALUES(low_price),
-      last_price = VALUES(last_price),
-      change_percent = VALUES(change_percent)
-      `;
+      await db.query(query, [
+        symbol,
+        regularMarketOpen || 0,
+        regularMarketDayHigh || 0,
+        regularMarketDayLow || 0,
+        regularMarketPrice || 0,
+        null,
+        marketCap || 0,
+        null,
+        fiftyTwoWeekHigh || 0,
+        fiftyTwoWeekLow || 0,
+        trailingPE || 0,
+      ]);
 
-      db.query(
-        query,
-        [
-          symbol,
-          regularMarketOpen,
-          regularMarketDayHigh,
-          regularMarketDayLow,
-          regularMarketPrice,
-          regularMarketChangePercent,
-        ],
-
-        (err) => {
-          if (err) {
-            console.log(`Error to saving ${symbol}`, err);
-          }
-        }
-      );
+      console.log(`Saved data for ${symbol}`);
     }
-    console.log("Nifty 50 data fetched and stored successfully");
   } catch (error) {
     console.error("Error fetching Nifty 50 data:", error.message);
   }
 };
 
-//fetching the data every minute
 setInterval(fetchAndSaveNifty50, 60000);
 
-//socket io for client
-//emit connection for client via socket.io
-io.on("conncetion", (socket) => {
-  console.log("new client is connected", socket.id);
-
-  // send updates to the client
-  setInterval(() => {
-    db.query(`SELECT * FROM nifty50_stocks`, (err, results) => {
-      if (err) {
-        console.log(`error to fetching stocks`, err);
-        return;
-      }
-
-      //send response to client
-      io.emit("stock Update", results);
-    });
-  }, 8000);
+io.on("connection", (socket) => {
+  console.log("New client connected", socket.id);
 
   socket.on("disconnect", () => {
-    console.log(`client is disconnect`, socket.id);
+    console.log("Client disconnected", socket.id);
   });
 });
 
-//server connection
+setInterval(() => {
+  db.query("SELECT * FROM nifty50_stocks")
+    .then(([results]) => {
+      io.emit("stockUpdate", results);
+    })
+    .catch((err) => {
+      console.log("Error fetching stocks:", err);
+    });
+}, 8000);
+
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`server is listning on port : `, PORT);
+server.listen(PORT, () => {
+  console.log(`Server listening on port: ${PORT}`);
 });
