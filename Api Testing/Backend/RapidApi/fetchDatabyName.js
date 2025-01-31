@@ -1,7 +1,8 @@
 require("dotenv").config({ path: "../.env" });
 const axios = require("axios");
+const fs = require("fs");
 
-const option = {
+const options = {
   method: "GET",
   url: "https://indian-stock-exchange-api2.p.rapidapi.com/stock",
   params: { name: "tata steel" },
@@ -11,17 +12,26 @@ const option = {
   },
 };
 
-try {
-  axios
-    .request(option)
-    .then((response) => {
-      console.log(response?.data);
-    })
-    .catch((err) => {
-      console.log(err);
+async function fetchData() {
+  try {
+    const response = await axios.request(options);
+    const data = response.data;
+    console.log(data);
+
+    // Convert JSON data to a string
+    const jsonData = JSON.stringify(data, null, 2);
+
+    // Write JSON data to a local file
+    fs.writeFile("stockData.json", jsonData, (err) => {
+      if (err) {
+        console.error("Error writing file:", err);
+      } else {
+        console.log("JSON data has been saved.");
+      }
     });
-} catch (error) {
-  console.log(error);
+  } catch (error) {
+    console.error(error);
+  }
 }
 
-
+fetchData();
