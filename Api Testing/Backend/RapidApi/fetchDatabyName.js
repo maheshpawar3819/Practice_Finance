@@ -5,7 +5,7 @@ const fs = require("fs");
 const options = {
   method: "GET",
   url: "https://indian-stock-exchange-api2.p.rapidapi.com/stock",
-  params: { name: "tata steel" },
+  params: { name: "COALINDIA" },
   headers: {
     "x-rapidapi-key": process.env.RPID_API_KEY,
     "x-rapidapi-host": "indian-stock-exchange-api2.p.rapidapi.com",
