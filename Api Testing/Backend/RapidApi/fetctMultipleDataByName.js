@@ -1,7 +1,7 @@
 require("dotenv").config({ path: "../.env" });
 const axios = require("axios");
 
-const stockNames = ["INFY.NS", "RELIANCE.NS"];
+const stockNames = ["INFY.NS", "COALINDIA"];
 
 const fetchStockData = async () => {
   try {
