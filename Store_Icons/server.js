@@ -62,23 +62,19 @@ db.connect((err) => {
 // API Endpoint to Get an Image by Name
 app.get("/image/:name", (req, res) => {
   const name = req.params.name;
-  console.log(name);
-  db.query(
-    "SELECT image FROM icons2 WHERE name = ?",
-    [name],
-    (err, result) => {
-      if (err) {
-        res.status(500).send("Database Error");
-        return;
-      }
-      if (result.length > 0) {
-        res.setHeader("Content-Type", "image/png");
-        res.send(result[0].image);
-      } else {
-        res.status(404).send("Image Not Found");
-      }
+  //   console.log(name);
+  db.query("SELECT image FROM icons2 WHERE name = ?", [name], (err, result) => {
+    if (err) {
+      res.status(500).send("Database Error");
+      return;
     }
-  );
+    if (result.length > 0) {
+      res.setHeader("Content-Type", "image/png");
+      res.send(result[0].image);
+    } else {
+      res.status(404).send("Image Not Found");
+    }
+  });
 });
 
 app.listen(port, () => {
