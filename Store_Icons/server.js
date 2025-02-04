@@ -28,35 +28,57 @@ db.connect((err) => {
 });
 
 // Read all files in the icons folder
-fs.readdir(iconsFolder, (err, files) => {
-  if (err) {
-    console.error("Error reading folder:", err);
-    return;
-  }
+// fs.readdir(iconsFolder, (err, files) => {
+//   if (err) {
+//     console.error("Error reading folder:", err);
+//     return;
+//   }
 
-  files.forEach((file) => {
-    const filePath = path.join(iconsFolder, file);
+//   files.forEach((file) => {
+//     const filePath = path.join(iconsFolder, file);
 
-    fs.readFile(filePath, (err, data) => {
+//     fs.readFile(filePath, (err, data) => {
+//       if (err) {
+//         console.error(`Error reading file ${file}:`, err);
+//         return;
+//       }
+
+//       db.query(
+//         `INSERT INTO icons2 (name,image) VALUES (?,?)`,
+//         [file, data],
+//         (err) => {
+//           if (err) {
+//             console.error(`Error inserting ${file}:`, err);
+//           } else {
+//             console.log(`Inserted ${file} successfully`);
+//           }
+//         }
+//       );
+//     });
+//     console.log(`All icons upload successfully`);
+//   });
+// });
+
+// API Endpoint to Get an Image by Name
+app.get("/image/:name", (req, res) => {
+  const name = req.params.name;
+  console.log(name);
+  db.query(
+    "SELECT image FROM icons2 WHERE name = ?",
+    [name],
+    (err, result) => {
       if (err) {
-        console.error(`Error reading file ${file}:`, err);
+        res.status(500).send("Database Error");
         return;
       }
-
-      db.query(
-        `INSERT INTO icons2 (name,image) VALUES (?,?)`,
-        [file, data],
-        (err) => {
-          if (err) {
-            console.error(`Error inserting ${file}:`, err);
-          } else {
-            console.log(`Inserted ${file} successfully`);
-          }
-        }
-      );
-    });
-    console.log(`All icons upload successfully`);
-  });
+      if (result.length > 0) {
+        res.setHeader("Content-Type", "image/png");
+        res.send(result[0].image);
+      } else {
+        res.status(404).send("Image Not Found");
+      }
+    }
+  );
 });
 
 app.listen(port, () => {
