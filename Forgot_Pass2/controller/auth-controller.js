@@ -102,11 +102,11 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    // const newHashPassword = await bcrypt.hash(password, 10);
+    const newHashPassword = await bcrypt.hash(password, 10);
 
     //update the user password
     await db.query(`UPDATE users SET password = ? WHERE email = ?`, [
-      password,
+      newHashPassword,
       decode.email,
     ]);
 
