@@ -4,20 +4,42 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
+const { google } = require("googleapis");
 const db = require("../Db/db");
 
 const router = express.Router();
 
-//email transport setup
+// OAuth2 Setup for Gmail
+const oauth2Client = new google.auth.OAuth2(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  process.env.GOOGLE_REDIRECT_URI
+);
+
+oauth2Client.setCredentials({
+  refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
+});
+
+// Generate an access token using OAuth2
+const accessToken = async () => {
+  const { token } = await oauth2Client.getAccessToken();
+  return token;
+};
+
+// Email transport setup using OAuth2
 const transporter = nodemailer.createTransport({
-  service: "Gmail",
+  service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    type: "OAuth2",
+    user: process.env.EMAIL_USER, // Your email address
+    clientId: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+    accessToken: accessToken,
   },
 });
 
-//route for add user
+// Route for adding a user
 router.post("/add-user", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -47,11 +69,13 @@ router.post("/add-user", async (req, res) => {
   }
 });
 
-//request to password reset
+// Request to password reset
 router.route("/forgot-password").post(async (req, res) => {
   try {
     const { email } = req.body;
-    const [rows] = await db.query(`SELECT * FROM users WHERE email = ?`, [
+
+    console.log(email);
+    const [rows] = await db.query("SELECT * FROM users WHERE email = ?", [
       email,
     ]);
 
@@ -66,30 +90,32 @@ router.route("/forgot-password").post(async (req, res) => {
       .createHash("sha256")
       .update(resetToken)
       .digest("hex");
-    const expiryTime = new Date(Date.now() + 3600000); //for 1 hr
+    const expiryTime = new Date(Date.now() + 3600000); // 1 hour expiration time
 
     await db.query(
-      `UPDATE users SET resetToken = ?,resetTokenExpires=? WHERE email= ? `,
+      `UPDATE users SET resetToken = ?, resetTokenExpires = ? WHERE email = ?`,
       [hashedToken, expiryTime, email]
     );
 
     const resetLink = `http://localhost:5173/reset-password/${resetToken}`;
+
+    // Send the reset link via email using OAuth2
     await transporter.sendMail({
       to: email,
       subject: "Password Reset Request",
       html: `<p>Click <a href="${resetLink}">here</a> to reset your password.</p>`,
     });
 
-    //send resonse
-    res.json({
-      message: "reset link send to your email",
+    return res.json({
+      message: "Reset link sent to your email",
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: "Server error", error });
   }
 });
 
-//reset password
+// Reset password
 router.route("/reset-password/:token").post(async (req, res) => {
   try {
     const { token } = req.params;
@@ -98,7 +124,7 @@ router.route("/reset-password/:token").post(async (req, res) => {
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
     const [rows] = await db.query(
-      `SELECT * FROM users WHERE resetToken = ? AND resetTokenExpires > NOW()`,
+      "SELECT * FROM users WHERE resetToken = ? AND resetTokenExpires > NOW()",
       [hashedToken]
     );
 
@@ -111,13 +137,13 @@ router.route("/reset-password/:token").post(async (req, res) => {
     const hashPassword = await bcrypt.hash(newPassword, 10);
 
     await db.query(
-      `UPDATE users SET password = ?,resetToken=NULL ,resetTokenExpires=NULL WHERE id=?`,
+      `UPDATE users SET password = ?, resetToken = NULL, resetTokenExpires = NULL WHERE id = ?`,
       [hashPassword, rows[0].id]
     );
 
-    //send response
+    // Send response
     res.json({
-      message: "Password Reset Successfull",
+      message: "Password reset successful",
     });
   } catch (error) {
     return res.status(500).json({ message: "Server error", error });
