@@ -6,11 +6,20 @@ const searchFunction = async (req, res) => {
 
     //to enable partial matching
     const searchKey = `%${key}%`;
+    // console.log(searchKey);
 
-    const [rows] = await db.query(
+    const [stockRows] = await db.query(
       `SELECT * FROM dummy_stocks_list WHERE company LIKE ? OR sector LIKE ?`,
       [searchKey, searchKey]
     );
+
+    const [fundRows] = await db.query(
+      `
+      SELECT * FROM mutualfunds_directplan_details WHERE Scheme_Name LIKE ?`,
+      [searchKey]
+    );
+
+    const rows = [...stockRows, ...fundRows];
 
     if (rows.length === 0) {
       return res.status(401).json({
