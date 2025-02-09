@@ -52,7 +52,7 @@ const searchFunctionWithOtherSuggestion = async (req, res) => {
     // Get the exact match for the searched company
     const [exactMatchRows] = await db.query(
       `SELECT * FROM dummy_stocks_list WHERE company LIKE ?`,
-      [key]
+      [searchKey]
     );
 
     // Get other stocks related to the same sector
@@ -72,6 +72,7 @@ const searchFunctionWithOtherSuggestion = async (req, res) => {
     );
 
     // Combine the results, with the exact match first
+    // Convert buffer to string
     const rows = [...exactMatchRows, ...relatedStockRows, ...relatedFundsRows];
 
     if (rows.length === 0) {
@@ -126,4 +127,8 @@ const getAllData = async (req, res) => {
   }
 };
 
-module.exports = { searchFunction, getAllData ,searchFunctionWithOtherSuggestion};
+module.exports = {
+  searchFunction,
+  getAllData,
+  searchFunctionWithOtherSuggestion,
+};
