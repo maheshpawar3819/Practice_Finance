@@ -75,7 +75,7 @@ const searchFunctionWithOtherSuggestion = async (req, res) => {
     // Convert buffer to string
     const rows = [...exactMatchRows, ...relatedStockRows, ...relatedFundsRows];
 
-    if (rows.length === 0) {
+    if (rows.length === 0) {  
       return res.status(401).json({
         error: true,
         message: "Data not found",
