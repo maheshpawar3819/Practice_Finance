@@ -14,7 +14,7 @@ router
   .route("/searchWithSuggestion/:key")
   .get(searchFunctionWithOtherSuggestion);
 
-//route for get all data from company tand and mutual fund table
+//route for get all data from company and and mutual fund table
 router.route("/allInfo").get(getAllData);
 
 module.exports = router;
