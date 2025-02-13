@@ -3,6 +3,9 @@ const db = require("../Db/db");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 
+
+
+
 //route for add user
 const adduser = async (req, res) => {
   try {
