@@ -1,2 +1,4 @@
 node_modules
 .env
+all_Companies.json
+nifty_500.json 
