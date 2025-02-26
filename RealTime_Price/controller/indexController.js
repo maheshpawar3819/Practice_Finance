@@ -1,6 +1,12 @@
 const { fetchIndexData } = require("../services/yaahoFinanceService");
 const db = require("../db_conig/db");
 const indices=require("./All_Com");
+const fristToFiveHundred = require("./1-500Com");
+const fiveHundredToOneThousand=require("./500-1000Com");
+const oneThousandToOneThousandFiveHundred=require("./1000-1500com");
+const oneThousandFiveHundredToTwoThousand=require("./1500-2000Com");
+const twoThousandAndMore=require("./2000AndAbove");
+
 
 // index symobls of sotck market
 // const indices = {
@@ -562,7 +568,7 @@ const indices=require("./All_Com");
 
 const fetchAndStoreData = async () => {
   // Iterate over each index in the indices object
-  for (const [name, symbol] of Object.entries(indices)) {
+  for (const [name, symbol] of Object.entries(fristToFiveHundred)) {
     // Fetch the index data using the fetchIndexData function
     const data = await fetchIndexData(symbol);
 
