@@ -56,9 +56,11 @@ io.on("connection", (socket) => {
 });
 
 //it will call api every 10 sec
-setInterval(async () => {
-  await fetchAndStoreData();
-},  1200000);
+// setInterval(async () => {
+//   await fetchAndStoreData();
+// },  120000);
+
+fetchAndStoreData()
 
 // start server
 const PORT = process.env.PORT || 3000;
