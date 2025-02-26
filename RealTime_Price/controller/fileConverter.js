@@ -1,8 +1,8 @@
 // const csv = require("csvtojson");
 const fs = require("fs");
 
-// const inputFile = "all_Companies.csv";  
-// const outputFile = "all_Companies.json";
+// const inputFile = "./AllComp/Sheet5.csv";  
+// const outputFile = "Sheet5.json";
 
 // csv()
 //   .fromFile(inputFile)
@@ -14,18 +14,11 @@ const fs = require("fs");
 
 
 // // Read the JSON file
-const rawData = fs.readFileSync("all_Companies.json", "utf-8");
-
-// Parse JSON
+const rawData = fs.readFileSync("Sheet5.json", "utf-8");
 const jsonArray = JSON.parse(rawData);
-
-// Convert to the required format
 const companyMap = jsonArray.reduce((acc, item) => {
-  acc[item["Company Name"]] = item["Symbol"];
+  acc[item["Company_Name"]] = item["Symbol"];
   return acc;
 }, {});
-
-// // Output the result
 console.log(companyMap);
-
 

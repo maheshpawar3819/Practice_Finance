@@ -1,12 +1,7 @@
 const { fetchIndexData } = require("../services/yaahoFinanceService");
 const db = require("../db_conig/db");
-const indices=require("./All_Com");
-const fristToFiveHundred = require("./1-500Com");
-const fiveHundredToOneThousand=require("./500-1000Com");
-const oneThousandToOneThousandFiveHundred=require("./1000-1500com");
-const oneThousandFiveHundredToTwoThousand=require("./1500-2000Com");
-const twoThousandAndMore=require("./2000AndAbove");
-
+// const indices=require("./All_Com");
+const { Sheet1, Sheet2, Sheet3, Sheet4, Sheet5 } = require("./ComData");
 
 // index symobls of sotck market
 // const indices = {
@@ -568,20 +563,22 @@ const twoThousandAndMore=require("./2000AndAbove");
 
 const fetchAndStoreData = async () => {
   // Iterate over each index in the indices object
-  for (const [name, symbol] of Object.entries(fristToFiveHundred)) {
+  for (const [name, symbol] of Object.entries(Sheet5)) {
     // Fetch the index data using the fetchIndexData function
     const data = await fetchIndexData(symbol);
 
-     // If data is missing, log an error and continue
-     if (!data) {
+    // If data is missing, log an error and continue
+    if (!data) {
       console.error(`Skipping ${name}: Data is missing`);
       continue;
     }
 
     // Use API's date if available, otherwise use today's date
-     const dateToStore = data.date ? data.date : new Date().toISOString().split("T")[0];
- 
-     // Validate other fields
+    const dateToStore = data.date
+      ? data.date
+      : new Date().toISOString().split("T")[0];
+
+    // Validate other fields
     if (!data.open || !data.high || !data.low || !data.current) {
       console.error(`Skipping ${name}: Some data fields are missing`, data);
       continue;
@@ -594,11 +591,11 @@ const fetchAndStoreData = async () => {
 
     //query for store data into table
     await db.query(
-      `INSERT INTO all_companies (index_name,date,open_price,high_price,low_price,current_price)
+      `INSERT INTO all_listed_com (index_name,date,open_price,high_price,low_price,current_price)
              VALUES (?,?,?,?,?,?)`,
       [name, dateToStore, data.open, data.high, data.low, data.current]
     );
   }
 };
 
-module.exports = { fetchAndStoreData, indices };
+module.exports = { fetchAndStoreData };
