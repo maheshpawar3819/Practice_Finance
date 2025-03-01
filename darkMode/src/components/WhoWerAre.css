@@ -1,0 +1,86 @@
+:root {
+    --primary-text: black;
+    --secondary-text: #292F42;
+    --bg-color: white;
+    --accent-color: #24b676;
+  }
+  
+  [data-theme="dark"] {
+    --primary-text: white;
+    --secondary-text: #ccc;
+    --bg-color: #292F42;
+    --accent-color: #24b676;
+  }
+  
+  body {
+    background-color: var(--bg-color);
+    color: var(--primary-text);
+    font-family: 'Calibri', sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .headerwhoweare {
+    background: linear-gradient(to right, var(--accent-color), #238486);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+    margin-top: 50px;
+    font-size: 26px;
+  }
+  
+  .whoweare-intro, .whoweare-mission, .whoweare-vision, .whoweare-approach, .whoweare-team, .whoweare-call-to-action {
+    width: 80%;
+    margin: auto;
+    padding: 20px;
+    color: var(--secondary-text);
+  }
+  
+  h2 {
+    color: var(--accent-color);
+    font-size: 24px;
+  }
+  
+  p {
+    font-size: 15px;
+  }
+  
+  .whoweare-key-points ul {
+    list-style-type: disc;
+    padding-left: 20px;
+  }
+  
+  .whoweare-key-points li {
+    margin-bottom: 10px;
+  }
+  
+  .imgwhoweare {
+    border-radius: 10px;
+    width: 100%;
+    max-width: 580px;
+    display: block;
+    margin: 20px auto;
+  }
+  
+  button#theme-toggle {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  @media (max-width: 768px) {
+    .whoweare-intro, .whoweare-mission, .whoweare-vision, .whoweare-approach, .whoweare-team, .whoweare-call-to-action {
+      width: 90%;
+    }
+    
+    .headerwhoweare {
+      font-size: 22px;
+    }
+  }
+  
