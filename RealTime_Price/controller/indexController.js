@@ -2,6 +2,7 @@ const { fetchIndexData } = require("../services/yaahoFinanceService");
 const db = require("../db_conig/db");
 // const indices=require("./All_Com");
 const { Sheet1, Sheet2, Sheet3, Sheet4, Sheet5 } = require("./ComData");
+const { demo } = require("./demo");
 
 // index symobls of sotck market
 // const indices = {
@@ -563,7 +564,7 @@ const { Sheet1, Sheet2, Sheet3, Sheet4, Sheet5 } = require("./ComData");
 
 const fetchAndStoreData = async () => {
   // Iterate over each index in the indices object
-  for (const [name, symbol] of Object.entries(Sheet5)) {
+  for (const [name, symbol] of Object.entries(demo)) {
     // Fetch the index data using the fetchIndexData function
     const data = await fetchIndexData(symbol);
 

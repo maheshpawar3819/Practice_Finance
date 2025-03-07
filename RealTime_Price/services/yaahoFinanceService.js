@@ -2,9 +2,9 @@ const axios = require("axios");
 
 const fetchIndexData = async (indexSymbol) => {
   try {
+  
     //api
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${indexSymbol}`;
-
     const response = await axios.get(url, {
       params: {
         range: "1d", // Time range of the data
