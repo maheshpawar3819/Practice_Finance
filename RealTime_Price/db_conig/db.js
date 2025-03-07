@@ -1,4 +1,4 @@
-require("dotenv").config();
+require("dotenv").config({ path: "../.env" })
 const mysql = require("mysql2");
 
 //creating connection poll
@@ -7,9 +7,8 @@ const pool = mysql.createPool({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE_NAME,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
+  port:process.env.DB_PORT,
 });
+
 
 module.exports = pool.promise();
